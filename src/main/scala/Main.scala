@@ -3,19 +3,28 @@ package main
 import josephus.CountLogic._
 
 /**
- * TODO
+ * Main function of the application.
+ * It handles argument parsing, calling the count out logic and printing the results.
  */
 object Main {
+	
 	def main(args: Array[String]): Unit = {
-		val result = args.toList match {
-			case numOfPeople :: stepRate :: startingPos :: Nil => parseArgsAndCountOut(numOfPeople, stepRate, startingPos)
-			case numOfPeople :: stepRate :: Nil => parseArgsAndCountOut(numOfPeople, stepRate)
-			case _ => Left("BAD params") //TODO
+		val result = parseArguments(args.toList) match {
+			case Right((numOfPeople, stepRate, startingPos)) => convertArgsAndCountOut(numOfPeople, stepRate, startingPos)
+			case Left(error) => Left(error)
 		}
 		printResult(result)
 	}
 
-	def parseArgsAndCountOut(strNumOfPeople: String, strStepRate: String, strStartingPos: String = "1"): Either[String, Long] =
+	def parseArguments(args: List[String]): Either[String, (String, String, String)] = args match {
+		case numOfPeople :: stepRate :: startingPos :: Nil => Right(numOfPeople, stepRate, startingPos)
+		case numOfPeople :: stepRate :: Nil => Right(numOfPeople, stepRate, "1")
+		case _ => Left("""Incorrect number of parameters.
+			|There are 2 mandatory parameters [number of people] [step rate]
+			|And one optional parameter [starting position]""".stripMargin)
+	}
+
+	def convertArgsAndCountOut(strNumOfPeople: String, strStepRate: String, strStartingPos: String): Either[String, Long] =
 		try {
 			val numOfPeople = strNumOfPeople.toLong
 			val stepRate = strStepRate.toLong
@@ -29,7 +38,10 @@ object Main {
 		}
 
 	def printResult(result: Either[String, Long]): Unit = result match {
-		case Left(errorMsg) => println(errorMsg)
-		case Right(startingPos) => println("OK " + startingPos)
+		case Left(errorMsg) =>
+			println(errorMsg)
+		case Right(startingPos) =>
+			println("Select position:")
+			println(startingPos)
 	}
 }
